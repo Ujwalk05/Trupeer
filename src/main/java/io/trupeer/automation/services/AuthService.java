@@ -23,7 +23,7 @@ public class AuthService {
     }
 
     public boolean isLoginFormVisible() {
-        return validate.waitForVisible(LoginPage.EMAIL, 5000);
+        return validate.waitForVisible(LoginPage.EMAIL, 15000);
     }
 
     public boolean isOnDashboard() {
@@ -37,23 +37,29 @@ public class AuthService {
         }
         click.click(LoginPage.LOGIN_TAB);
         input.fillVerified(LoginPage.EMAIL, email);
+        input.assertValue(LoginPage.EMAIL, email);
         input.fillVerified(LoginPage.PASSWORD, password);
+        input.assertValue(LoginPage.EMAIL, email);
+        input.assertValue(LoginPage.PASSWORD, password);
         click.click(LoginPage.SUBMIT);
     }
 
     /**
-     * Idempotent: if we're already inside the app, does nothing; otherwise opens
-     * the app and authenticates with the configured credentials.
+     * Idempotent: reuse an existing signed-in browser session, otherwise perform
+     * the same explicit login-page flow used by the @LoggingIn scenarios.
      */
     public void ensureLoggedIn() {
         Page page = DriverManager.getPage();
         if (page.url().contains("trupeer.ai") && !page.url().contains("/auth")) {
             return;
         }
-        page.navigate(cfg.baseUrl());
-        validate.waitForPageLoad();
+
+        openLoginPage();
         if (isLoginFormVisible()) {
             login(cfg.email(), cfg.password());
+        }
+        if (!isOnDashboard()) {
+            throw new FrameworkException("Login failed - dashboard did not load. URL: " + page.url());
         }
     }
 

@@ -4,11 +4,12 @@ Feature: Video editor
   I want to open a video in the editor and use its features
   So that I can review and edit my content
 
-  Background:
-    Given the user is logged in
+ # Background:
+ #   Given the user is logged in
 
   @smoke @editor
   Scenario: Editor loads with its key elements
+  Given the user is logged in
     When the user opens an existing video in the editor
     Then the editor page loads with its key elements
 
